@@ -1,11 +1,11 @@
-import { StyleSheet, Keyboard, KeyboardAvoidingView, Platform, Pressable, TextInput, View, Switch } from "react-native";
+import { formatDate } from "@/app/(tabs)";
+import { addRecurringEntry } from "@/data/repository/recurring-entry.repo";
+import { Cadence, CADENCES } from "@/models/types/cadences.types";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useCallback, useMemo, useState } from "react";
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Switch, TextInput, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
-import React, { useCallback, useMemo, useState } from "react";
-import { addTransaction } from "@/data/repository/expense.repo";
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { formatDate } from "@/app/(tabs)";
-import { Cadence, CADENCES } from "@/models/types/cadences.types";
 
 /** -------- Add Expense Form -------- */
 export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | void }) {
@@ -38,7 +38,7 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
         setError(null);
         try {
             // Store ISO string to avoid TZ ambiguity; backend can parse to date-only if desired
-            await addTransaction({
+            await addRecurringEntry({
                 name: name.trim(),
                 amount: amountNumber,
                 cadence,

@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Platform, StyleSheet, View } from 'react-native';
+import { Button, StyleSheet, View } from 'react-native';
 
 import { AddExpenseForm } from '@/components/AddExpenseForm';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { deleteAllTransactions, listTransactions, monthlyTotal } from '@/data/repository/expense.repo';
-import { Transaction } from '@/models/types/transaction.type';
+import { deleteAllRecurringEntries, listRecurringEntries, monthlyTotal } from '@/data/repository/recurring-entry.repo';
+import { RecurringEntry } from '@/models/recurring-entry.interface';
 
 export function formatDate(d: Date) {
   return d.toLocaleDateString();
@@ -15,7 +15,7 @@ export function formatDate(d: Date) {
 
 /** -------- Home Screen (with list + actions) -------- */
 export default function HomeScreen() {
-  const [expenses, setExpenses] = useState<Transaction[]>([]);
+  const [expenses, setExpenses] = useState<RecurringEntry[]>([]);
   const [monthly, setMonthly] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export default function HomeScreen() {
     setLoading(true);
     setErr(null);
     try {
-      const [items, total] = await Promise.all([listTransactions(), monthlyTotal()]);
+      const [items, total] = await Promise.all([listRecurringEntries(), monthlyTotal()]);
       setExpenses(items ?? []);
       setMonthly(Number(total ?? 0));
     } catch (e: any) {
@@ -40,7 +40,7 @@ export default function HomeScreen() {
     setLoading(true);
     setErr(null);
     try {
-      await deleteAllTransactions();
+      await deleteAllRecurringEntries();
       await refresh();
     } catch (e: any) {
       setErr(e?.message ?? String(e));

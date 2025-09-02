@@ -13,11 +13,11 @@ export async function initDb() {
     const db = await getDb();
     // keep it simple first; add PRAGMAs later
     await db.execAsync(` 
-      CREATE TABLE IF NOT EXISTS transactions (
+      CREATE TABLE IF NOT EXISTS recurringEntry (
         id INTEGER PRIMARY KEY NOT NULL,
         name TEXT NOT NULL,
         amount INTEGER NOT NULL,
-        cadence TEXT NOT NULL CHECK (cadence IN ('monthly', 'annual', 'biweekly', 'weekly', 'daily')),
+        cadence TEXT NOT NULL CHECK (cadence IN ('monthly', 'annual', 'biweekly', 'weekly', 'daily', 'once')),
         dueDay INTEGER,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,
