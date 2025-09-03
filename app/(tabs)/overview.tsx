@@ -66,7 +66,7 @@ function DayCard({ event }: { event: ProjectedEvent }) {
             {p.isIncome ? '+' : '-'}
             {fmtUSD(Math.abs(p.amountCents * 100))}
           </ThemedText>
-          <ThemedText style={styles.balanceAmount}>{fmtUSD(event.balanceCents * 100)}</ThemedText>
+          <ThemedText style={styles.balanceAmount} type={event.balanceCents * 100 >= 0 ? "income" : "expense"}>{fmtUSD(event.balanceCents * 100)}</ThemedText>
         </View>
       ))}
     </ThemedView>

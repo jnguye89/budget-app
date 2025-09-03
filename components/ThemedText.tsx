@@ -16,7 +16,6 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-
   return (
     <Text
       style={[
@@ -62,15 +61,15 @@ const styles = StyleSheet.create({
   error: {
     lineHeight: 30,
     fontSize: 16,
-    color: 'FF0000'
+    color: '#FF0000'
   },
   expense: {
     lineHeight: 30,
     fontSize: 16,
-    color: 'FF0000'
+    color: '#FF0000'
   },
   income: {
-    color: '85bb65',
+    color: '#85bb65',
     lineHeight: 30,
     fontSize: 16,
   }
