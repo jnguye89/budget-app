@@ -5,26 +5,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { ProjectedEvent } from '@/models/projected-event.types';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { MonthSection } from '@/models/types/month-section.types';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 
 type Projection = Awaited<ReturnType<typeof projectBalance>>;
+type Row = { id: string; name: string; amountCents: number; balanceCents: number };
 
 export default function TabTwoScreen() {
   const [projection, setProjection] = useState<Projection | null>(null);
-  // useEffect(() => {
-  //   let alive = true;
-  //   (async () => {
-  //     // do your async reads here
-  //     const res = projectBalance({ startingBalanceCents: 0, from: '2025-09-01', monthsAhead: 12 });
-  //     if (alive) setProjection(res);
-  //   })();
-  //   return () => { alive = false; };
-  // }, []);
+
   useEffect(() => {
     let alive = true;
     (async () => {
-      const res = await projectBalance({ startingBalanceCents: 0, from: '2025-09-01', monthsAhead: 12 });
+      const res = await projectBalance({ startingBalanceCents: 16.04, from: '2025-09-01', monthsAhead: 12 });
       if (alive) setProjection(res);
     })();
     return () => { alive = false; };
@@ -32,7 +23,7 @@ export default function TabTwoScreen() {
 
   // ✅ Always called; returns [] while loading
   const timeline = useMemo(
-    () => (projection ? toSections(projection.timeline) : []),
+    () => (projection ? projection.timeline : []),
     [projection]
   );
 
@@ -66,42 +57,28 @@ function DayCard({ event }: { event: ProjectedEvent }) {
   const net = event.dayNetCents;
   return (
     <ThemedView style={styles.card}>
-      {/* Day header */}
-      {/* <View style={styles.dayHeader}>
-        <ThemedText style={styles.dayDate}>{formatDate(event.date)}</ThemedText>
-      </View> */}
-
-      {/* Postings for the day */}
       {event.postings.map((p, i) => (
         <View style={styles.postingRow} key={`${event.date}-${i}-${p.label}-${p.amountCents}`}>
           <ThemedText style={styles.postingLabel}>{formatDate(event.date)} - {p.label}</ThemedText>
           <ThemedText
             style={[styles.postingAmount, p.amountCents >= 0 ? styles.income : styles.expense]}
           >
-            {sign(p.amountCents)}
-            {fmtUSD(Math.abs(p.amountCents))}
+            {p.isIncome ? '+' : '-'}
+            {fmtUSD(Math.abs(p.amountCents * 100))}
           </ThemedText>
-          <ThemedText style={styles.balanceAmount}>{fmtUSD(event.balanceCents)}</ThemedText>
+          <ThemedText style={styles.balanceAmount}>{fmtUSD(event.balanceCents * 100)}</ThemedText>
         </View>
       ))}
-
-      {/* End-of-day balance */}
-      {/* <View style={styles.balanceRow}>
-        <ThemedText style={styles.balanceLabel}>End of day</ThemedText>
-      </View> */}
     </ThemedView>
   );
 }
 
 /** ---- Helpers ---- */
-function toSections(timeline: ProjectedEvent[]): ProjectedEvent[] {
-  return timeline;
-}
 
 function formatDate(yyyyMmDd: string) {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
   const dt = new Date(y, m - 1, d);
-  return dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
 function fmtUSD(cents: number) {

@@ -1,9 +1,7 @@
 import { listRecurringEntries } from "@/data/repository/recurring-entry.repo";
 import { getState } from "@/data/repository/state.repo";
-import { CashflowEntry } from "@/models/cash-flow-entry.interface";
 import { ProjectedEvent } from "@/models/projected-event.types";
 import { RecurringEntry } from "@/models/recurring-entry.interface";
-const defaultPredictionPeriod = 365;
 
 export async function getAllRecurringEntries(): Promise<RecurringEntry[]> {
     const entries = await listRecurringEntries();
@@ -56,17 +54,16 @@ export async function projectBalance(opts: {
     const endD = parseISO(end);
 
     // ---- generate all occurrences within [from, end] ----
-    type Occ = { date: string; label: string; amountCents: number };
+    type Occ = { date: string; label: string; amountCents: number, isIncome: boolean };
     const occs: Occ[] = [];
-    console.log('here');
 
     for (const e of entries) {
         const start = new Date(e.dueDay);
         const until = endD;
-        
+
         if (e.cadence === 'once') {
             if (start >= fromD && start <= endD) {
-                occs.push({ date: formatISO(start), label: e.name, amountCents: e.amount });
+                occs.push({ date: formatISO(start), label: e.name, amountCents: e.amount, isIncome: e.isIncome });
             }
             continue;
         }
@@ -83,7 +80,7 @@ export async function projectBalance(opts: {
             }
             while (cur <= endD && cur <= until) {
                 if (cur >= fromD) {
-                    occs.push({ date: formatISO(cur), label: e.name, amountCents: e.amount });
+                    occs.push({ date: formatISO(cur), label: e.name, amountCents: e.amount, isIncome: e.isIncome });
                 }
                 cur = addDays(cur, step);
             }
@@ -96,7 +93,7 @@ export async function projectBalance(opts: {
             // move up to first month >= fromD
             while (cur < fromD) cur = addMonths(cur, 1);
             while (cur <= endD && cur <= until) {
-                occs.push({ date: formatISO(cur), label: e.name, amountCents: e.amount });
+                occs.push({ date: formatISO(cur), label: e.name, amountCents: e.amount, isIncome: e.isIncome });
                 cur = addMonths(cur, 1);
             }
             continue;
@@ -115,11 +112,11 @@ export async function projectBalance(opts: {
 
     for (const date of dates) {
         const postings = byDate.get(date)!;
-        const dayNet = postings.reduce((s, p) => s + p.amountCents, 0);
+        const dayNet = postings.reduce((s, p) => s + (p.isIncome ? p.amountCents : -p.amountCents), 0);
         running += dayNet;
         timeline.push({
             date,
-            postings: postings.map(p => ({ label: p.label, amountCents: p.amountCents })),
+            postings: postings.map(p => ({ label: p.label, amountCents: p.amountCents, isIncome: p.isIncome })),
             dayNetCents: dayNet,
             balanceCents: running,
         });
