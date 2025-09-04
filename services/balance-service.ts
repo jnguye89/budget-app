@@ -106,6 +106,7 @@ export async function projectBalance(opts: {
         if (!byDate.has(o.date)) byDate.set(o.date, []);
         byDate.get(o.date)!.push(o);
     }
+    console.log(byDate);
     const dates = Array.from(byDate.keys()).sort(); // YYYY-MM-DD sorts lexicographically
     let running = startingBalanceCents;
     const timeline: ProjectedEvent[] = [];
@@ -113,12 +114,15 @@ export async function projectBalance(opts: {
     for (const date of dates) {
         const postings = byDate.get(date)!;
         const dayNet = postings.reduce((s, p) => s + (p.isIncome ? p.amountCents : -p.amountCents), 0);
-        running += dayNet;
         timeline.push({
             date,
-            postings: postings.map(p => ({ label: p.label, amountCents: p.amountCents, isIncome: p.isIncome })),
-            dayNetCents: dayNet,
-            balanceCents: running,
+            postings: postings
+                .sort((a, b) => (a.isIncome === b.isIncome) ? 0 : (a.isIncome ? -1 : 1))
+                .map(p => {
+                    running += (p.isIncome ? p.amountCents : -p.amountCents);
+                    return { label: p.label, amountCents: p.amountCents, isIncome: p.isIncome, balanceCents: running }
+                })
+
         });
     }
 

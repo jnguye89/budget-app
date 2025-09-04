@@ -57,7 +57,6 @@ export default function TabTwoScreen() {
 
 /** ---- Day card ---- */
 function DayCard({ event }: { event: ProjectedEvent }) {
-  const net = event.dayNetCents;
   return (
     <ThemedView style={styles.card}>
       {event.postings.map((p, i) => (
@@ -69,7 +68,7 @@ function DayCard({ event }: { event: ProjectedEvent }) {
             {p.isIncome ? '+' : '-'}
             {fmtUSD(Math.abs(p.amountCents * 100))}
           </ThemedText>
-          <ThemedText style={styles.balanceAmount} type={event.balanceCents * 100 >= 0 ? "income" : "expense"}>{fmtUSD(event.balanceCents * 100)}</ThemedText>
+          <ThemedText style={styles.balanceAmount} type={p.balanceCents * 100 >= 0 ? "income" : "expense"}>{fmtUSD(p.balanceCents * 100)}</ThemedText>
         </View>
       ))}
     </ThemedView>
