@@ -19,7 +19,9 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
     const [cadence, setCadence] = useState<Cadence>('monthly');
 
     const [dueDate, setDueDate] = useState<Date>(new Date());
+    const [endDate, setEndDate] = useState<Date | null>(null);
     const [showPicker, setShowPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -43,14 +45,17 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
                 amount: amountNumber,
                 cadence,
                 dueDay: dueDate.toISOString(),
-                isIncome: isIncome
+                isIncome: isIncome,
+                endDay: endDate ? endDate.toISOString() : null
             });
 
             setName('');
             setAmountText('');
             setCadence('monthly');
             setDueDate(new Date());
+            setEndDate(null);
             setShowPicker(false);
+            setShowEndPicker(false);
             Keyboard.dismiss();
             await onAdded();
         } catch (e: any) {
@@ -65,9 +70,14 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
         if (selected) setDueDate(selected);
     };
 
+    const onEndDateChange = (_event: any, selected?: Date) => {
+        if (Platform.OS !== 'ios') setShowEndPicker(false);
+        if (selected) setEndDate(selected);
+    };
+
     return (
         <ThemedView style={styles.card}>
-            <ThemedText type="subtitle" style={{ marginBottom: 8 }}>Add an expense</ThemedText>
+            <ThemedText type="subtitle" style={{ marginBottom: 8 }}>Add an { isIncome ? 'income stream' : 'expense'}</ThemedText>
 
             <KeyboardAvoidingView behavior={Platform.select({ ios: 'padding', android: undefined })}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -75,7 +85,6 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
                     <Switch
                         value={isIncome}
                         onValueChange={setIsIncome}
-                        // optional styling:
                         trackColor={{ false: '#aaa', true: '#34d399' }}
                         thumbColor="#fff"
                         accessibilityRole="switch"
@@ -154,6 +163,42 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
                             mode="date"
                             display={Platform.select({ ios: 'spinner', android: 'default' })}
                             onChange={onDateChange}
+                        />
+                    )}
+                </View>
+
+                <View style={styles.field}>
+                    <ThemedText style={styles.label}>End date</ThemedText>
+
+
+                    <Pressable
+                        onPress={() => setShowEndPicker(true)}
+                        style={[styles.input, { justifyContent: 'center', flexDirection: 'row', alignItems: 'center', gap: 8 }]}
+                        accessibilityRole="button"
+                        testID="end-date-open"
+                    >
+                        <ThemedText>
+                            {endDate ? formatDate(endDate) : 'No end date'}
+                        </ThemedText>
+
+                        {endDate && (
+                            <Pressable onPress={() => setEndDate(null)} accessibilityRole="button">
+                                <ThemedText type="error">Clear</ThemedText>
+                            </Pressable>
+                        )}
+                    </Pressable>
+
+                    {showEndPicker && (
+                        <DateTimePicker
+                            // value cannot be null → fall back to a sensible default
+                            value={endDate ?? stripTime(dueDate)}
+                            minimumDate={stripTime(dueDate)}
+                            mode="date"
+                            display={Platform.select({ ios: 'spinner', android: 'default' })}
+                            onChange={(_event, selected) => {
+                                if (Platform.OS !== 'ios') setShowEndPicker(false); // Android modal closes
+                                if (selected) setEndDate(selected);                 // only set when user picked a date
+                            }}
                         />
                     )}
                 </View>

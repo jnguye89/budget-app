@@ -1,13 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, StyleSheet, View } from 'react-native';
+import { Button, FlatList, StyleSheet, View } from 'react-native';
 
 import { AddExpenseForm } from '@/components/AddExpenseForm';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { deleteAllRecurringEntries, listRecurringEntries, monthlyTotal } from '@/data/repository/recurring-entry.repo';
+import { deleteRecurringEntryById, listRecurringEntries } from '@/data/repository/recurring-entry.repo';
 import { RecurringEntry } from '@/models/recurring-entry.interface';
+import { RecurringEntryList } from '@/components/RecurringEntryList';
+import { RecurringEntryRow } from '@/components/RecurringEntryRow';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function formatDate(d: Date) {
   return d.toLocaleDateString();
@@ -16,7 +19,6 @@ export function formatDate(d: Date) {
 /** -------- Home Screen (with list + actions) -------- */
 export default function HomeScreen() {
   const [expenses, setExpenses] = useState<RecurringEntry[]>([]);
-  const [monthly, setMonthly] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -24,9 +26,8 @@ export default function HomeScreen() {
     setLoading(true);
     setErr(null);
     try {
-      const [items, total] = await Promise.all([listRecurringEntries(), monthlyTotal()]);
+      const [items] = await Promise.all([listRecurringEntries()]);
       setExpenses(items ?? []);
-      setMonthly(Number(total ?? 0));
     } catch (e: any) {
       setErr(e?.message ?? String(e));
     } finally {
@@ -34,59 +35,40 @@ export default function HomeScreen() {
     }
   }, []);
 
+  useCallback(
+    async (id: number) => {
+      setLoading(true);
+      setErr(null);
+      try {
+        await deleteRecurringEntryById(id);
+        // TODO: update local list state or refetch here
+      } catch (e: any) {
+        setErr(e?.message ?? String(e));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [deleteRecurringEntryById]
+  );
+
   useEffect(() => { refresh(); }, [refresh]);
 
-  const handleDeleteAll = useCallback(async () => {
-    setLoading(true);
-    setErr(null);
-    try {
-      await deleteAllRecurringEntries();
-      await refresh();
-    } catch (e: any) {
-      setErr(e?.message ?? String(e));
-      setLoading(false);
-    }
-  }, [refresh]);
-
+  // return (
   return (
-    <ParallaxScrollView>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Budgeting made fun!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <AddExpenseForm onAdded={refresh} />
-
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Your expenses</ThemedText>
-        {loading ? (
-          <ThemedText>Loading…</ThemedText>
-        ) : err ? (
-          <ThemedText type="error">{err}</ThemedText>
-        ) : expenses.length === 0 ? (
-          <ThemedText>No expenses yet.</ThemedText>
-        ) : (
-          <View>
-            {expenses.map((e, i) => {
-              const due = e.dueDay ? new Date(e.dueDay) : undefined;
-              return (
-                <ThemedText key={e.id ?? i}>
-                  • {e.name}: ${e.amount} ({e.cadence})
-                  {due ? ` — due ${formatDate(due)}` : ''}
-                </ThemedText>
-              );
-            })}
-          </View>
-        )}
-        <ThemedText style={{ marginTop: 8 }}>
-          Monthly total: <ThemedText type="defaultSemiBold">${monthly.toFixed(2)}</ThemedText>
-        </ThemedText>
-
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-          <Button title="Refresh" onPress={refresh} />
-          <Button title="Delete all" onPress={handleDeleteAll} />
-        </View>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+      <FlatList
+        data={expenses}
+        keyExtractor={(it) => String(it.id)}
+        renderItem={({ item }) => <RecurringEntryRow item={item} onDelete={async () => { await deleteRecurringEntryById(item.id!); await refresh(); }} />}
+        ListHeaderComponent={
+          <AddExpenseForm onAdded={refresh} />
+        }
+        ListEmptyComponent={<ThemedText style={{ padding: 16, opacity: 0.6 }}>No entries yet</ThemedText>}
+        contentContainerStyle={{ padding: 12, gap: 12 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      />
+    </SafeAreaView>
   );
 }
 

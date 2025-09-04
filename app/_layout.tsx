@@ -1,18 +1,24 @@
+// app/_layout.tsx
+import 'react-native-gesture-handler'; // must be first
+import 'react-native-reanimated';
+
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { initDb } from '@/data/db';
 
 export default function RootLayout() {
-  // 🔹 Always call hooks — no early returns before these
   const colorScheme = useColorScheme();
+
   const [fontsLoaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   const [dbReady, setDbReady] = useState(false);
@@ -28,23 +34,24 @@ export default function RootLayout() {
     return () => { cancelled = true; };
   }, []);
 
-  // Hide splash only when BOTH are ready
   useEffect(() => {
-    if (fontsLoaded && dbReady) {
-      SplashScreen.hideAsync();
-    }
+    if (fontsLoaded && dbReady) SplashScreen.hideAsync();
   }, [fontsLoaded, dbReady]);
 
-  // Keep splash visible until everything is ready
   if (!fontsLoaded || !dbReady) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          {/* translucent helps on Android; SafeAreaView will handle the inset */}
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} translucent />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

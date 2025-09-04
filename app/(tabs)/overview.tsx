@@ -1,10 +1,11 @@
-import { FlatList, SectionList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 
 import { projectBalance } from '@/services/balance-service';
 import { useEffect, useMemo, useState } from 'react';
 import { ProjectedEvent } from '@/models/projected-event.types';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Projection = Awaited<ReturnType<typeof projectBalance>>;
 type Row = { id: string; name: string; amountCents: number; balanceCents: number };
@@ -28,27 +29,29 @@ export default function TabTwoScreen() {
   );
 
   return (
-    <ThemedView style={{ flex: 1 }}>
-      <FlatList
-        data={timeline}
-        // keyExtractor={(item) => item.date}
-        renderItem={({ item }) =>
-          <DayCard event={item} />
-        }
-        ListHeaderComponent={
-          <ThemedView style={styles.card}>
-            <View style={styles.postingRow}>
-              <ThemedText style={styles.postingLabel}>Name</ThemedText>
-              <ThemedText style={styles.postingAmount}>Amount</ThemedText>
-              <ThemedText style={styles.balanceAmount}>Balance</ThemedText>
-            </View>
-          </ThemedView>
-        }
-        ListHeaderComponentStyle={styles.headerWrap}
-        stickyHeaderIndices={[0]} // <- make the header stick to top while scrolling (optional)
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        contentContainerStyle={{ paddingBottom: 16 }} ></FlatList>
-    </ThemedView>
+    <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+      <ThemedView style={{ flex: 1 }}>
+        <FlatList
+          data={timeline}
+          // keyExtractor={(item) => item.date}
+          renderItem={({ item }) =>
+            <DayCard event={item} />
+          }
+          ListHeaderComponent={
+            <ThemedView style={styles.card}>
+              <View style={styles.postingRow}>
+                <ThemedText style={styles.postingLabel}>Name</ThemedText>
+                <ThemedText style={styles.postingAmount}>Amount</ThemedText>
+                <ThemedText style={styles.balanceAmount}>Balance</ThemedText>
+              </View>
+            </ThemedView>
+          }
+          ListHeaderComponentStyle={styles.headerWrap}
+          stickyHeaderIndices={[0]} // <- make the header stick to top while scrolling (optional)
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          contentContainerStyle={{ paddingBottom: 16 }} ></FlatList>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 

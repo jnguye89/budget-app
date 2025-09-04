@@ -7,4 +7,5 @@ export interface RecurringEntry {
   cadence: Cadence;
   dueDay: string;
   isIncome: boolean;
+  endDay: string | null;
 };
