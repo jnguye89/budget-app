@@ -35,7 +35,7 @@ export default function TabLayout() {
         name="overview"
         options={{
           title: 'Overview',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="info.circle" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -43,6 +43,13 @@ export default function TabLayout() {
         options={{
           title: 'Add Expense',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="plus.app" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="edit"
+        options={{
+          title: 'Edit',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="pencil.circle" color={color} />,
         }}
       />
     </Tabs>

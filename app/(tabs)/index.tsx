@@ -1,15 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 
 import { AddExpenseForm } from '@/components/AddExpenseForm';
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { RecurringEntryRow } from '@/components/RecurringEntryRow';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { deleteRecurringEntryById, listRecurringEntries } from '@/data/repository/recurring-entry.repo';
 import { RecurringEntry } from '@/models/recurring-entry.interface';
-import { RecurringEntryList } from '@/components/RecurringEntryList';
-import { RecurringEntryRow } from '@/components/RecurringEntryRow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function formatDate(d: Date) {
@@ -60,9 +56,7 @@ export default function HomeScreen() {
         data={expenses}
         keyExtractor={(it) => String(it.id)}
         renderItem={({ item }) => <RecurringEntryRow item={item} onDelete={async () => { await deleteRecurringEntryById(item.id!); await refresh(); }} />}
-        ListHeaderComponent={
-          <AddExpenseForm onAdded={refresh} />
-        }
+
         ListEmptyComponent={<ThemedText style={{ padding: 16, opacity: 0.6 }}>No entries yet</ThemedText>}
         contentContainerStyle={{ padding: 12, gap: 12 }}
         keyboardShouldPersistTaps="handled"

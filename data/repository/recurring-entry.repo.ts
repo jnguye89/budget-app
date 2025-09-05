@@ -1,5 +1,6 @@
 import { RecurringEntry } from "@/models/recurring-entry.interface";
 import { getDb } from "../db";
+import { parseUSDToCents } from "@/services/format-currency.service";
 
 
 export async function addRecurringEntry(e: Omit<RecurringEntry, "id">) {
@@ -8,7 +9,7 @@ export async function addRecurringEntry(e: Omit<RecurringEntry, "id">) {
   const res = await db.runAsync(
     `INSERT INTO recurringEntry (name, amount, cadence, dueDay, createdAt, updatedAt, isIncome, endDay)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    e.name, e.amount, e.cadence, e.dueDay ?? null, now, now, e.isIncome, e.endDay
+    e.name, parseUSDToCents(e.amount), e.cadence, e.dueDay ?? null, now, now, e.isIncome, e.endDay
   );
   return res.lastInsertRowId as number;
 }

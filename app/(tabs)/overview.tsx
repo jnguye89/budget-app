@@ -1,22 +1,36 @@
 import { FlatList, StyleSheet, View } from 'react-native';
 
 import { projectBalance } from '@/services/balance-service';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProjectedEvent } from '@/models/projected-event.types';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { onBudgetChanged } from '@/lib/events';
+import { getState } from '@/data/repository/state.repo';
 
 type Projection = Awaited<ReturnType<typeof projectBalance>>;
 type Row = { id: string; name: string; amountCents: number; balanceCents: number };
 
 export default function TabTwoScreen() {
   const [projection, setProjection] = useState<Projection | null>(null);
-
+  const load = useCallback(async () => {
+    // NOTE: if projectBalance expects cents, use 1604 (not 16.04)
+    var state = await getState();
+    const res = await projectBalance({
+      startingBalanceCents: state.currentBalance,
+      from: state.lastCalcDate,
+      monthsAhead: 12,
+    });
+    setProjection(res);
+  }, []);
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => onBudgetChanged(load), [load]);
   useEffect(() => {
     let alive = true;
     (async () => {
-      const res = await projectBalance({ startingBalanceCents: 16.04, from: '2025-09-01', monthsAhead: 12 });
+      var state = await getState();
+      const res = await projectBalance({ startingBalanceCents: state.currentBalance, from: state.lastCalcDate, monthsAhead: 12 });
       if (alive) setProjection(res);
     })();
     return () => { alive = false; };
@@ -153,3 +167,7 @@ const styles = StyleSheet.create({
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });
+function load(): void {
+  throw new Error('Function not implemented.');
+}
+

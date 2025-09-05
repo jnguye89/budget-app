@@ -1,15 +1,23 @@
 import { listRecurringEntries } from "@/data/repository/recurring-entry.repo";
-import { getState } from "@/data/repository/state.repo";
+import { getState, updateDbState } from "@/data/repository/state.repo";
 import { ProjectedEvent } from "@/models/projected-event.types";
 import { RecurringEntry } from "@/models/recurring-entry.interface";
+import { State } from "@/models/state.interface";
 
 export async function getAllRecurringEntries(): Promise<RecurringEntry[]> {
     const entries = await listRecurringEntries();
     return entries;
 }
 
-export async function getCurrentState() {
-    const state = await getState();
+export async function getCurrentState(): Promise<State> {
+    return await getState() as State;
+}
+
+export async function updateState() {
+    var state = await getCurrentState();
+    var result = await projectBalance({ startingBalanceCents: state.currentBalance, from: state.lastCalcDate, to: new Date().toISOString() });
+    console.log('final', result.finalBalanceCents);
+    await updateDbState(result.finalBalanceCents);
 }
 
 export async function projectBalance(opts: {
@@ -50,7 +58,7 @@ export async function projectBalance(opts: {
         return target;
     }
 
-    const fromD = parseISO(from);
+    const fromD = !!from ? parseISO(from) : new Date();
     const endD = parseISO(end);
 
     // ---- generate all occurrences within [from, end] ----
@@ -106,14 +114,12 @@ export async function projectBalance(opts: {
         if (!byDate.has(o.date)) byDate.set(o.date, []);
         byDate.get(o.date)!.push(o);
     }
-    console.log(byDate);
     const dates = Array.from(byDate.keys()).sort(); // YYYY-MM-DD sorts lexicographically
     let running = startingBalanceCents;
     const timeline: ProjectedEvent[] = [];
 
     for (const date of dates) {
         const postings = byDate.get(date)!;
-        const dayNet = postings.reduce((s, p) => s + (p.isIncome ? p.amountCents : -p.amountCents), 0);
         timeline.push({
             date,
             postings: postings

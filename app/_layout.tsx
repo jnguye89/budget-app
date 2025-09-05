@@ -13,6 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React, { useEffect, useState } from 'react';
 import { initDb } from '@/data/db';
+import { updateState } from '@/services/balance-service';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -22,6 +23,25 @@ export default function RootLayout() {
   });
 
   const [dbReady, setDbReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await initDb();
+      } finally {
+        if (!cancelled) setDbReady(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (!dbReady || !fontsLoaded) return;
+      await updateState();
+    })()
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {

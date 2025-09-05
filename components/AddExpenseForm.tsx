@@ -6,6 +6,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Switch, TextInput, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
+import { emitBudgetChanged } from "@/lib/events";
 
 /** -------- Add Expense Form -------- */
 export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | void }) {
@@ -48,6 +49,7 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
                 isIncome: isIncome,
                 endDay: endDate ? endDate.toISOString() : null
             });
+            emitBudgetChanged();
 
             setName('');
             setAmountText('');
