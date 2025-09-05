@@ -36,13 +36,6 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      if (!dbReady || !fontsLoaded) return;
-      await updateState();
-    })()
-  }, []);
-
-  useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
@@ -57,6 +50,13 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded && dbReady) SplashScreen.hideAsync();
   }, [fontsLoaded, dbReady]);
+
+  useEffect(() => {
+    (async () => {
+      if (!dbReady || !fontsLoaded) return;
+      await updateState();
+    })()
+  }, [dbReady, fontsLoaded]);
 
   if (!fontsLoaded || !dbReady) return null;
 

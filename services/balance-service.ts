@@ -15,9 +15,10 @@ export async function getCurrentState(): Promise<State> {
 
 export async function updateState() {
     var state = await getCurrentState();
+    console.log('state', state);
     var result = await projectBalance({ startingBalanceCents: state.currentBalance, from: state.lastCalcDate, to: new Date().toISOString() });
-    console.log('final', result.finalBalanceCents);
-    await updateDbState(result.finalBalanceCents);
+    console.log(result.finalBalanceCents);
+    await updateDbState(result.finalBalanceCents / 100);
 }
 
 export async function projectBalance(opts: {
@@ -31,10 +32,9 @@ export async function projectBalance(opts: {
     const { startingBalanceCents, from, to, monthsAhead } = opts;
     if (!to && !monthsAhead) throw new Error('Provide either `to` or `monthsAhead`.');
     const end = to ?? formatISO(addMonths(parseISO(from), monthsAhead!));
-
     // ---- date helpers (local, date-only) ----
     function parseISO(s: string): Date {
-        const [y, m, d] = s.split('-').map(Number);
+        const [y, m, d] = s.slice(0,10).split('-').map(Number);
         return new Date(y, m - 1, d);
     }
     function formatISO(d: Date): string {
@@ -66,6 +66,7 @@ export async function projectBalance(opts: {
     const occs: Occ[] = [];
 
     for (const e of entries) {
+        console.log('e', e);
         const start = new Date(e.dueDay);
         const until = endD;
 

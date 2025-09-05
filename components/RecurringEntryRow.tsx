@@ -45,7 +45,7 @@ export function RecurringEntryRow({
             </ThemedText>
           </View>
           <ThemedText style={[styles.amount, item.isIncome ? styles.income : styles.expense]}>
-            {(item.isIncome ? '+' : '-')}${item.amount.toFixed(2)}
+            {(item.isIncome ? '+' : '-')}${(item.amount / 100).toFixed(2)}
           </ThemedText>
         </ThemedView>
       </Pressable>

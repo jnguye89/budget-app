@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 
-import { AddExpenseForm } from '@/components/AddExpenseForm';
 import { RecurringEntryRow } from '@/components/RecurringEntryRow';
 import { ThemedText } from '@/components/ThemedText';
 import { deleteRecurringEntryById, listRecurringEntries } from '@/data/repository/recurring-entry.repo';

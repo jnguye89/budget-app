@@ -80,9 +80,9 @@ function DayCard({ event }: { event: ProjectedEvent }) {
             style={[styles.postingAmount, p.amountCents >= 0 ? styles.income : styles.expense]}
           >
             {p.isIncome ? '+' : '-'}
-            {fmtUSD(Math.abs(p.amountCents * 100))}
+            {fmtUSD(Math.abs(p.amountCents))}
           </ThemedText>
-          <ThemedText style={styles.balanceAmount} type={p.balanceCents * 100 >= 0 ? "income" : "expense"}>{fmtUSD(p.balanceCents * 100)}</ThemedText>
+          <ThemedText style={styles.balanceAmount} type={p.balanceCents / 100 >= 0 ? "income" : "expense"}>{fmtUSD(p.balanceCents)}</ThemedText>
         </View>
       ))}
     </ThemedView>

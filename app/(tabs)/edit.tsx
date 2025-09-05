@@ -4,7 +4,6 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { listRecurringEntries } from "@/data/repository/recurring-entry.repo";
 import { RecurringEntry } from "@/models/recurring-entry.interface";
 import { useCallback, useEffect, useState } from "react";
-import { SafeAreaView } from "react-native";
 
 export default function BalanceEditScreen() {
     const [loading, setLoading] = useState(false);

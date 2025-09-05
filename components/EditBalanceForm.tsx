@@ -3,7 +3,6 @@ import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { getState, updateDbState } from "@/data/repository/state.repo";
-import { State } from "@/models/state.interface";
 
 export function EditExpenseForm() {
     const [balance, setBalance] = useState('');
