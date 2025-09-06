@@ -17,8 +17,9 @@ export async function addRecurringEntry(e: Omit<RecurringEntry, "id">) {
 export async function listRecurringEntries(): Promise<RecurringEntry[]> {
   const db = await getDb();
   const res = await db.getAllAsync<RecurringEntry>(
-    `SELECT id, name, amount, cadence, dueDay, isIncome FROM recurringEntry ORDER BY name`
+    `SELECT id, name, amount, cadence, dueDay, isIncome, endDay FROM recurringEntry ORDER BY name`
   );
+  console.log(res);
   return res;
 }
 

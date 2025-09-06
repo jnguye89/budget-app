@@ -5,6 +5,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 import { RecurringEntry } from '@/models/recurring-entry.interface';
+import { toDateOnly } from '@/services/helper/date-only.service';
 
 export function RecurringEntryRow({
   item,
@@ -43,6 +44,12 @@ export function RecurringEntryRow({
             <ThemedText style={styles.sub}>
               {item.cadence} • Due {new Date(item.dueDay).toLocaleDateString()}
             </ThemedText>
+            {
+              !!item.endDay ? <ThemedText style={styles.sub}>
+                End date {toDateOnly(new Date(item.endDay))}
+              </ThemedText> : null
+            }
+
           </View>
           <ThemedText style={[styles.amount, item.isIncome ? styles.income : styles.expense]}>
             {(item.isIncome ? '+' : '-')}${(item.amount / 100).toFixed(2)}

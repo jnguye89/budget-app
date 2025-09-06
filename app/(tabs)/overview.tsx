@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { onBudgetChanged } from '@/lib/events';
 import { getState } from '@/data/repository/state.repo';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Projection = Awaited<ReturnType<typeof projectBalance>>;
 type Row = { id: string; name: string; amountCents: number; balanceCents: number };
@@ -24,17 +25,15 @@ export default function TabTwoScreen() {
     });
     setProjection(res);
   }, []);
-  useEffect(() => { load(); }, [load]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
+
+  // keep your event wiring; ensure it returns an unsubscribe for cleanup
   useEffect(() => onBudgetChanged(load), [load]);
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      var state = await getState();
-      const res = await projectBalance({ startingBalanceCents: state.currentBalance, from: state.lastCalcDate, monthsAhead: 12 });
-      if (alive) setProjection(res);
-    })();
-    return () => { alive = false; };
-  }, []);
 
   // ✅ Always called; returns [] while loading
   const timeline = useMemo(

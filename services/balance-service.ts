@@ -15,9 +15,7 @@ export async function getCurrentState(): Promise<State> {
 
 export async function updateState() {
     var state = await getCurrentState();
-    console.log('state', state);
     var result = await projectBalance({ startingBalanceCents: state.currentBalance, from: state.lastCalcDate, to: new Date().toISOString() });
-    console.log(result.finalBalanceCents);
     await updateDbState(result.finalBalanceCents / 100);
 }
 
@@ -66,9 +64,10 @@ export async function projectBalance(opts: {
     const occs: Occ[] = [];
 
     for (const e of entries) {
-        console.log('e', e);
         const start = new Date(e.dueDay);
-        const until = endD;
+        let until = endD;
+        if (!!e.endDay)
+            until = parseISO(e.endDay);
 
         if (e.cadence === 'once') {
             if (start >= fromD && start <= endD) {

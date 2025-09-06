@@ -1,12 +1,12 @@
 import { formatDate } from "@/app/(tabs)";
 import { addRecurringEntry } from "@/data/repository/recurring-entry.repo";
+import { emitBudgetChanged } from "@/lib/events";
 import { Cadence, CADENCES } from "@/models/types/cadences.types";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useCallback, useMemo, useState } from "react";
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Switch, TextInput, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
-import { emitBudgetChanged } from "@/lib/events";
 
 /** -------- Add Expense Form -------- */
 export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | void }) {
@@ -40,6 +40,7 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
         setSubmitting(true);
         setError(null);
         try {
+            console.log('submitting end date', endDate)
             // Store ISO string to avoid TZ ambiguity; backend can parse to date-only if desired
             await addRecurringEntry({
                 name: name.trim(),
@@ -65,7 +66,7 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
         } finally {
             setSubmitting(false);
         }
-    }, [canSubmit, name, amountNumber, cadence, dueDate, onAdded]);
+    }, [canSubmit, name, amountNumber, cadence, dueDate, isIncome, endDate, onAdded]);
 
     const onDateChange = (_event: any, selected?: Date) => {
         if (Platform.OS !== 'ios') setShowPicker(false);
@@ -75,11 +76,12 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
     const onEndDateChange = (_event: any, selected?: Date) => {
         if (Platform.OS !== 'ios') setShowEndPicker(false);
         if (selected) setEndDate(selected);
+        console.log(endDate);
     };
 
     return (
         <ThemedView style={styles.card}>
-            <ThemedText type="subtitle" style={{ marginBottom: 8 }}>Add an { isIncome ? 'income stream' : 'expense'}</ThemedText>
+            <ThemedText type="subtitle" style={{ marginBottom: 8 }}>Add an {isIncome ? 'income stream' : 'expense'}</ThemedText>
 
             <KeyboardAvoidingView behavior={Platform.select({ ios: 'padding', android: undefined })}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -197,10 +199,7 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
                             minimumDate={stripTime(dueDate)}
                             mode="date"
                             display={Platform.select({ ios: 'spinner', android: 'default' })}
-                            onChange={(_event, selected) => {
-                                if (Platform.OS !== 'ios') setShowEndPicker(false); // Android modal closes
-                                if (selected) setEndDate(selected);                 // only set when user picked a date
-                            }}
+                            onChange={onEndDateChange}
                         />
                     )}
                 </View>
