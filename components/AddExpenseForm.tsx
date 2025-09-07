@@ -40,7 +40,6 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
         setSubmitting(true);
         setError(null);
         try {
-            console.log('submitting end date', endDate)
             // Store ISO string to avoid TZ ambiguity; backend can parse to date-only if desired
             await addRecurringEntry({
                 name: name.trim(),
@@ -76,7 +75,6 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
     const onEndDateChange = (_event: any, selected?: Date) => {
         if (Platform.OS !== 'ios') setShowEndPicker(false);
         if (selected) setEndDate(selected);
-        console.log(endDate);
     };
 
     return (
@@ -163,7 +161,7 @@ export function AddExpenseForm({ onAdded }: { onAdded: () => Promise<void> | voi
                     {showPicker && (
                         <DateTimePicker
                             value={dueDate}
-                            minimumDate={stripTime(new Date())}
+                            // minimumDate={stripTime(new Date())}
                             mode="date"
                             display={Platform.select({ ios: 'spinner', android: 'default' })}
                             onChange={onDateChange}

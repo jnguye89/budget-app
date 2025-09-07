@@ -46,7 +46,7 @@ export function RecurringEntryRow({
             </ThemedText>
             {
               !!item.endDay ? <ThemedText style={styles.sub}>
-                End date {toDateOnly(new Date(item.endDay))}
+                End date {new Date(item.endDay).toLocaleDateString()}
               </ThemedText> : null
             }
 

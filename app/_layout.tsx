@@ -23,17 +23,6 @@ export default function RootLayout() {
   });
 
   const [dbReady, setDbReady] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        await initDb();
-      } finally {
-        if (!cancelled) setDbReady(true);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;

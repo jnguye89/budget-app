@@ -19,7 +19,6 @@ export async function listRecurringEntries(): Promise<RecurringEntry[]> {
   const res = await db.getAllAsync<RecurringEntry>(
     `SELECT id, name, amount, cadence, dueDay, isIncome, endDay FROM recurringEntry ORDER BY name`
   );
-  console.log(res);
   return res;
 }
 

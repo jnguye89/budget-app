@@ -3,9 +3,17 @@ import * as SQLite from 'expo-sqlite';
 export type DB = SQLite.SQLiteDatabase;
 
 let dbPromise: Promise<DB> | null = null;
-export function getDb() {
+let migrationsOnce: Promise<void> | null = null;
+
+export async function getDb() {
   if (!dbPromise) dbPromise = SQLite.openDatabaseAsync('budget.db');
-  return dbPromise;
+  const db = await dbPromise; 
+
+  // Run migrations once per app launch, and block callers until done.
+  if (!migrationsOnce) migrationsOnce = runMigrations(db);
+  await migrationsOnce;
+
+  return db;
 }
 
 // --- tiny helpers ---
@@ -18,6 +26,7 @@ async function getUserVersion(db: DB): Promise<number> {
 async function setUserVersion(db: DB, v: number) {
   await db.execAsync(`PRAGMA user_version = ${v}`);
 }
+
 async function tableExists(db: DB, name: string): Promise<boolean> {
   const r = await db.getFirstAsync<Row<{ name: string }>>(
     'SELECT name FROM sqlite_master WHERE type="table" AND name=? LIMIT 1',
@@ -78,13 +87,9 @@ const migrations: Migration[] = [
 ];
 
 // --- runner ---
-export async function runMigrations(): Promise<void> {
-  const db = await getDb();
+async function runMigrations(db: DB) {
   let v = await getUserVersion(db);
-
-  // Ensure ascending order
   const sorted = [...migrations].sort((a, b) => a.to - b.to);
-
   for (const m of sorted) {
     if (v < m.to) {
       await db.withTransactionAsync(async () => {
@@ -97,11 +102,4 @@ export async function runMigrations(): Promise<void> {
 }
 
 // Call this at app startup
-export async function initDb() {
-  const db = await getDb();
-  // optional: durability tweaks (check support per platform)
-  // await db.execAsync('PRAGMA journal_mode = WAL');
-  // await db.execAsync('PRAGMA synchronous = NORMAL');
-
-  await runMigrations();
-}
+export async function initDb() { await getDb(); }

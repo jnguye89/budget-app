@@ -35,13 +35,13 @@ export function EditExpenseForm() {
             <ThemedText type="subtitle">Overwrite Balance</ThemedText>
             <KeyboardAvoidingView>
                 <View style={styles.field}>
-                    <ThemedText style={styles.label}>Name</ThemedText>
+                    <ThemedText style={styles.label}>Balance</ThemedText>
                     <TextInput
                         value={balance}
                         onChangeText={setBalance}
                         placeholder="$"
-                        autoCapitalize="words"
-                        returnKeyType="next"
+                        keyboardType={Platform.select({ ios: 'decimal-pad', android: 'numeric' })}
+                        // returnKeyType="done"
                         style={styles.input}
                         accessibilityLabel="Expense name"
                         testID="expense-name"

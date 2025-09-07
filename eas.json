@@ -1,0 +1,18 @@
+{
+  "cli": { "version": ">= 3.0.0" },
+  "build": {
+    "production": {
+      "ios": { "resourceClass": "medium" }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6752210107",
+        "ascApiKeyPath": "./AuthKey_YPH3FKGTYJ.p8",
+        "ascApiKeyIssuerId": "21032040-9d12-4dea-bfd4-a3d4b79759cc",
+        "ascApiKeyId": "YPH3FKGTYJ"
+      }
+    }
+  }
+}

@@ -2,14 +2,19 @@
   "expo": {
     "name": "budgeteer",
     "slug": "budgeteer",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "budgeteer",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.siliconvalleyaitv.accountable",
+      "buildNumber": "1.0.2",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,6 +43,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2ada8a39-e822-4ac5-89b9-4bb3b5b70ec8"
+      }
     }
   }
 }
